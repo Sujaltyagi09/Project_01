@@ -1,0 +1,288 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MIN_OPENING_BALANCE 5000
+#define MINIMUM_BALANCE 50
+#define FINE_RATE 0.1
+#define DEBIT_CARD_CHARGE 10
+#define SMS_SERVICE_CHARGE 5
+
+// Structure to represent a bank account
+struct BankAccount
+{
+    char name[50];
+    int accountNumber;
+    double balance;
+    char accountType; // 'C' for Current, 'S' for Savings
+    int isDebitCardIssued;
+    int isSMSServiceOpted;
+    int isNetBankingFree;
+};
+
+// Function to create a new account
+struct BankAccount createAccount(int accountNumber, char name[], double initialBalance, char accountType)
+{
+    struct BankAccount account;
+    account.accountNumber = accountNumber;
+    strcpy(account.name, name);
+    account.balance = initialBalance;
+    account.accountType = accountType;
+    return account;
+}
+
+// Function to deposit money into an account
+void deposit(struct BankAccount *account, double amount)
+{
+    account->balance += amount;
+}
+
+// Function to withdraw money from an account
+void withdraw(struct BankAccount *account, double amount)
+{
+    if (amount <= account->balance)
+    {
+        account->balance -= amount;
+    }
+    else
+    {
+        printf("Insufficient balance\n");
+    }
+}
+
+// Function to calculate interest on savings account
+void calculateInterest(struct BankAccount *account, double interestRate)
+{
+    if (account->accountType == 'S' && account->balance<50)
+    {
+        double fine=account->balance * FINE_RATE;
+        account->balance -= fine;
+        printf("Penalty charged and deducted from the account!\n");
+    }
+    else{   
+        double interest = account->balance * interestRate / 100.0;
+        account->balance += interest;
+        printf("Interest calculated and added to the account!\n");
+    }
+}
+
+// Function to display account details
+void displayAccount(struct BankAccount account)
+{
+    printf("Account Number: %d\n", account.accountNumber);
+    printf("Name: %s\n", account.name);
+    printf("Balance: %.2lf\n", account.balance);
+    printf("Account Type: %c\n", account.accountType);
+}
+
+int main()
+{
+    int numAccounts = 0;
+    struct BankAccount accounts[100];
+    double savingsInterestRate = 5.0; // Example interest rate for savings accounts
+
+    int choice;
+    do
+    {
+        printf("\nBanking System Menu\n");
+        printf("1. Create Current Account\n");
+        printf("2. Create Savings Account\n");
+        printf("3. Deposit\n");
+        printf("4. Withdraw\n");
+        printf("5. Calculate Interest/Charges (Savings Account)\n");
+        printf("6. Display Account Details\n");
+        printf("7. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice)
+        {
+        case 1:
+        {
+            if (numAccounts < 100){
+                int accountNumber;
+                char name[50];
+                double initialBalance ;   
+                printf("Enter Account Number: ");
+                scanf("%d", &accountNumber);
+                printf("Enter Name: ");
+                scanf("%s", name);
+                printf("Enter Initial Balance(minimum Rs.5000): ");
+                scanf("%lf", &initialBalance); 
+                if(initialBalance<5000)
+                {
+                    printf("Insufficient Opening Balance!\nPlease Try Again!!\n\n");
+                }
+                else {
+                char accountType = 'C' ;   
+                accounts[numAccounts] = createAccount(accountNumber, name, initialBalance, accountType);
+                numAccounts++;
+                printf("Account created successfully!\n\n");
+                }
+            }
+            else
+            {
+                printf("Cannot create more accounts. The limit is reached.\n");
+            }
+            break;
+        }
+        case 2:
+        {
+            if (numAccounts < 100)
+            {
+                int accountNumber;
+                char name[50];
+                double initialBalance;    
+                printf("Enter Account Number: ");
+                scanf("%d", &accountNumber);
+                printf("Enter Name: ");
+                scanf("%s", name);
+                printf("Enter Initial Balance(minimum Rs.100): ");
+                scanf("%lf", &initialBalance);
+                if(initialBalance<100)
+                {
+                printf("Insufficient Opening Balance!\nPlease Try Again!!\n\n");
+                }
+                else {
+                char accountType ='S';    
+                accounts[numAccounts] = createAccount(accountNumber, name, initialBalance, accountType);
+                numAccounts++;
+                printf("Account created successfully!\n\n");
+                }
+            }
+            else
+            {
+                printf("Cannot create more accounts. The limit is reached.\n");
+            }
+            break;
+        }
+        case 3:
+        {
+            if (numAccounts > 0)
+            {
+                int accountNumber;
+                double amount;
+                printf("Enter Account Number: ");
+                scanf("%d", &accountNumber);
+                int found = 0;
+                for (int i = 0; i < numAccounts; i++)
+                {
+                    if (accounts[i].accountNumber == accountNumber)
+                    {
+                        printf("Enter the amount to deposit: ");
+                        scanf("%lf", &amount);
+                        deposit(&accounts[i], amount);
+                        found = 1;
+                        printf("Amount deposited successfully!\n");
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    printf("Account not found.\n");
+                }
+            }
+            else
+            {
+                printf("No accounts available.\n");
+            }
+            break;
+        }
+        case 4:
+        {
+            if (numAccounts > 0)
+            {
+                int accountNumber;
+                double amount;
+                printf("Enter Account Number: ");
+                scanf("%d", &accountNumber);
+                int found = 0;
+                for (int i = 0; i < numAccounts; i++)
+                {
+                    if (accounts[i].accountNumber == accountNumber)
+                    {
+                        printf("Enter the amount to withdraw: ");
+                        scanf("%lf", &amount);
+                        withdraw(&accounts[i], amount);
+                        found = 1;
+                        printf("Amount withdrawn successfully!\n");
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    printf("Account not found.\n");
+                }
+            }
+            else
+            {
+                printf("No accounts available.\n");
+            }
+            break;
+        }
+        case 5:
+        {
+            if (numAccounts > 0)
+            {
+                int accountNumber;
+                printf("Enter Account Number (Savings Account): ");
+                scanf("%d", &accountNumber);
+                int found = 0;
+                for (int i = 0; i < numAccounts; i++)
+                {
+                    if (accounts[i].accountNumber == accountNumber && accounts[i].accountType == 'S')
+                    {
+                        calculateInterest(&accounts[i], savingsInterestRate);
+                        found = 1;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    printf("Savings Account not found.\n");
+                }
+            }
+            else
+            {
+                printf("No accounts available.\n");
+            }
+            break;
+        }
+        case 6:
+        {
+            if (numAccounts > 0)
+            {
+                int accountNumber;
+                printf("Enter Account Number: ");
+                scanf("%d", &accountNumber);
+                int found = 0;
+                for (int i = 0; i < numAccounts; i++)
+                {
+                    if (accounts[i].accountNumber == accountNumber)
+                    {
+                        displayAccount(accounts[i]);
+                        found = 1;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    printf("Account not found.\n");
+                }
+            }
+            else
+            {
+                printf("No accounts available.\n");
+            }
+            break;
+        }
+        case 7:
+            printf("Exiting the program. Goodbye!\n");
+            break;
+        default:
+            printf("Invalid choice. Please try again.\n");
+        }
+    } while (choice != 7);
+
+    return 0;
+}
